@@ -8,8 +8,8 @@ import styled from 'styled-components';
 
 // Styled Component for the Graph Container
 const GraphContainer = styled.div`
-  width: ${(props) => (props.isMinimized ? '250px' : '600px')};
-  height: ${(props) => (props.isMinimized ? '150px' : '400px')};
+  width: ${(props) => (props.isMinimized ? '250px' : '90%')};
+  height: ${(props) => (props.isMinimized ? '150px' : '90vh')};
   position: absolute;
   top: 20px;
   right: 20px;
