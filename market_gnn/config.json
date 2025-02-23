@@ -1,0 +1,27 @@
+{
+    "data_processing": {
+        "window_size": 30,
+        "prediction_horizon": 5,
+        "crash_threshold": -0.1,
+        "min_connection_weight": 0.3
+    },
+    "model": {
+        "hidden_dim": 128,
+        "num_layers": 3,
+        "dropout": 0.5,
+        "use_attention": true
+    },
+    "training": {
+        "device": "cuda",
+        "learning_rate": 0.001,
+        "weight_decay": 0.01,
+        "num_epochs": 100,
+        "batch_size": 32,
+        "patience": 10
+    },
+    "paths": {
+        "model_save_dir": "models",
+        "results_dir": "results",
+        "processed_data_dir": "processed_data"
+    }
+} 

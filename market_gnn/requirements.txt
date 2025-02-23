@@ -1,0 +1,7 @@
+neo4j==5.14.1
+requests==2.31.0
+tqdm==4.66.1
+python-dateutil==2.8.2
+spacy==3.7.2
+pandas==2.1.4
+numpy==1.24.3 
