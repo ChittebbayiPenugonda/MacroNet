@@ -3,27 +3,46 @@ import Globe from 'react-globe.gl';
 import * as THREE from 'three';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
 import axios from 'axios';
+import Graph from './Graph'; // Import the Graph component
+import styled from 'styled-components';
+
+// Styled Component for the Graph Container
+const GraphContainer = styled.div`
+  width: ${(props) => (props.isMinimized ? '250px' : '600px')};
+  height: ${(props) => (props.isMinimized ? '150px' : '400px')};
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  transition: width 0.3s, height 0.3s;
+  z-index: 1000;
+  background-color: #f4f4f9;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  cursor: pointer;
+`;
 
 const GlobeComponent = () => {
   const [countryData, setCountryData] = useState([]);
   const [geoJson, setGeoJson] = useState(null);
   const [clickedCountry, setClickedCountry] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isGraphMinimized, setIsGraphMinimized] = useState(true);
   const globeRef = useRef(null);
 
   // Fetch mock country score data
   useEffect(() => {
     const mockData = [
-      { "name": "United States", "score": 90, "description": "The United States is a global superpower with the largest economy." },
-      { "name": "Brazil", "score": 70, "description": "Brazil is known for its rainforests, soccer, and Carnival festival." },
-      { "name": "Germany", "score": 85, "description": "Germany is a leading industrial country in Europe with a rich cultural history." },
-      { "name": "India", "score": 60, "description": "India is the world's largest democracy and a major economic force in Asia." },
-      { "name": "Australia", "score": 80, "description": "Australia is known for its unique wildlife, beautiful landscapes, and beaches." },
-      { "name": "Canada", "score": 75, "description": "Canada is the second-largest country by land area and famous for its natural beauty." },
-      { "name": "China", "score": 95, "description": "China is the world's most populous country and an economic powerhouse." },
-      { "name": "Russia", "score": 50, "description": "Russia is the largest country by land area and rich in natural resources." },
-      { "name": "South Africa", "score": 65, "description": "South Africa is known for its diverse cultures, wildlife, and beautiful landscapes." },
-      { "name": "Mexico", "score": 55, "description": "Mexico is known for its rich cultural heritage, cuisine, and beautiful beaches." }
+      { name: "United States of America", score: 90, description: "The United States is a global superpower with the largest economy." },
+      { name: "Brazil", score: 70, description: "Brazil is known for its rainforests, soccer, and Carnival festival." },
+      { name: "Germany", score: 85, description: "Germany is a leading industrial country in Europe with a rich cultural history." },
+      { name: "India", score: 60, description: "India is the world's largest democracy and a major economic force in Asia." },
+      { name: "Australia", score: 80, description: "Australia is known for its unique wildlife, beautiful landscapes, and beaches." },
+      { name: "Canada", score: 75, description: "Canada is the second-largest country by land area and famous for its natural beauty." },
+      { name: "China", score: 95, description: "China is the world's most populous country and an economic powerhouse." },
+      { name: "Russia", score: 50, description: "Russia is the largest country by land area and rich in natural resources." },
+      { name: "South Africa", score: 65, description: "South Africa is known for its diverse cultures, wildlife, and beautiful landscapes." },
+      { name: "Mexico", score: 55, description: "Mexico is known for its rich cultural heritage, cuisine, and beautiful beaches." }
     ];
     setCountryData(mockData);
   }, []);
@@ -124,12 +143,12 @@ const GlobeComponent = () => {
         onPolygonClick={handleClick}
       />
       
-      {/* Embedded Input Form - Top Left */}
+      {/* Input Form - Top Left */}
       <div 
         style={{
           position: 'absolute',
-          top: '20px',   // 20px from the top of the screen
-          left: '20px',  // 20px from the left of the screen
+          top: '20px',
+          left: '20px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -178,11 +197,20 @@ const GlobeComponent = () => {
         </button>
       </div>
       
+      {/* Graph Container - Toggle Minimize/Expand */}
+      <GraphContainer
+        isMinimized={isGraphMinimized}
+        onClick={() => setIsGraphMinimized(!isGraphMinimized)}
+      >
+        <Graph />
+      </GraphContainer>
+
+      {/* Popup for country info */}
       {clickedCountry && (
         <div 
           style={{
             position: 'absolute',
-            top: '20px',
+            bottom: '150px',
             right: '20px',
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
@@ -191,6 +219,7 @@ const GlobeComponent = () => {
             maxWidth: '300px',
             zIndex: 1000,
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            border: '2px solid #00F9FF',
           }}
         >
           <h3 style={{ margin: '0 0 10px 0' }}>{clickedCountry.name}</h3>
