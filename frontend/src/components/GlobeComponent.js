@@ -22,12 +22,31 @@ const GraphContainer = styled.div`
   cursor: pointer;
 `;
 
+// Styled Component for the Text Display
+const TextContainer = styled.div`
+  width: 300px;
+  height: 200px;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid #00F9FF;
+  z-index: 1000;
+  overflow-y: auto;
+  max-height: 300px;
+`;
+
 const GlobeComponent = () => {
   const [countryData, setCountryData] = useState([]);
   const [geoJson, setGeoJson] = useState(null);
   const [clickedCountry, setClickedCountry] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isGraphMinimized, setIsGraphMinimized] = useState(true);
+  const [dynamicText, setDynamicText] = useState(''); // State to store dynamic text
   const globeRef = useRef(null);
 
   // Fetch mock country score data
@@ -55,6 +74,17 @@ const GlobeComponent = () => {
       })
       .catch((error) => {
         console.error('Error fetching GeoJSON data', error);
+      });
+  }, []);
+
+  // Fetch dynamic text from backend (replace with your backend URL)
+  useEffect(() => {
+    axios.get('https://your-backend-api.com/get-text')  // Replace with actual API URL
+      .then((response) => {
+        setDynamicText(response.data.text);  // Assuming your API returns an object with a "text" field
+      })
+      .catch((error) => {
+        console.error('Error fetching dynamic text', error);
       });
   }, []);
 
@@ -204,6 +234,12 @@ const GlobeComponent = () => {
       >
         <Graph />
       </GraphContainer>
+
+      {/* Dynamic Text Container */}
+      <TextContainer>
+        <h3>Dynamic Information</h3>
+        <p>{dynamicText || "Loading dynamic text..."}</p>
+      </TextContainer>
 
       {/* Popup for country info */}
       {clickedCountry && (
