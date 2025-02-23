@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import ReactFlow, { Background, Controls, MiniMap } from "reactflow";
 import "reactflow/dist/style.css";
 import styled from "styled-components";
+import { stratify, tree } from "d3-hierarchy";
 
 // Styled Components for better UI
 const GraphContainer = styled.div`
   width: 100%;
   height: 100%;
-  background-color:rgb(12, 12, 62);
+  background-color: rgb(12, 12, 62);
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   padding: 10px;
@@ -29,51 +30,58 @@ const CustomNodeStyle = styled.div`
   }
 `;
 
-// Mock JSON Data (No Position)
-let mockData = '{"nodes": [{"id": "0", "data": {"label": "tech industry"}}, {"id": "1", "data": {"label": "chip manufacturing"}}, {"id": "2", "data": {"label": "smartphone sales"}}, {"id": "3", "data": {"label": "electric vehicle production"}}, {"id": "4", "data": {"label": "Gaming console production"}}, {"id": "5", "data": {"label": "Automotive industry"}}, {"id": "6", "data": {"label": "Laptop manufacturing"}}, {"id": "7", "data": {"label": "Battery production"}}, {"id": "8", "data": {"label": "Automotive supply chain"}}, {"id": "9", "data": {"label": "Green energy initiatives"}}, {"id": "10", "data": {"label": "Gaming community"}}, {"id": "11", "data": {"label": "Console manufacturers"}}, {"id": "12", "data": {"label": "Holiday sales"}}, {"id": "13", "data": {"label": "Electric Vehicle Manufacturing"}}, {"id": "14", "data": {"label": "Renewable Energy Systems"}}, {"id": "15", "data": {"label": "Portable Electronics"}}, {"id": "16", "data": {"label": "Console sales"}}, {"id": "17", "data": {"label": "Gamer satisfaction"}}, {"id": "18", "data": {"label": "Esports industry"}}, {"id": "19", "data": {"label": "Automotive Industry"}}, {"id": "20", "data": {"label": "Green Energy Initiatives"}}, {"id": "21", "data": {"label": "Gaming Console Production"}}, {"id": "22", "data": {"label": "Gaming community"}}, {"id": "23", "data": {"label": "Console manufacturers"}}, {"id": "24", "data": {"label": "Esports industry"}}, {"id": "25", "data": {"label": "Employment rates"}}, {"id": "26", "data": {"label": "Auto part suppliers"}}, {"id": "27", "data": {"label": "Car prices"}}, {"id": "28", "data": {"label": "Gamer satisfaction"}}, {"id": "29", "data": {"label": "Esports industry"}}, {"id": "30", "data": {"label": "Console sales"}}, {"id": "31", "data": {"label": "Gaming industry"}}, {"id": "32", "data": {"label": "Esports industry"}}, {"id": "33", "data": {"label": "Gamer satisfaction"}}, {"id": "34", "data": {"label": "Unemployment benefits"}}, {"id": "35", "data": {"label": "Consumer spending"}}, {"id": "36", "data": {"label": "Government revenue"}}], "edges": [{"id": "e0-1", "source": "0", "target": "1", "label": "Production delays"}, {"id": "e0-2", "source": "0", "target": "2", "label": "Reduced supply"}, {"id": "e0-3", "source": "0", "target": "3", "label": "Component scarcity"}, {"id": "e1-4", "source": "1", "target": "4", "label": "Delayed releases"}, {"id": "e1-5", "source": "1", "target": "5", "label": "Component scarcity"}, {"id": "e1-6", "source": "1", "target": "6", "label": "Reduced output"}, {"id": "e3-7", "source": "3", "target": "7", "label": "Reduced capacity"}, {"id": "e3-8", "source": "3", "target": "8", "label": "Disrupted logistics"}, {"id": "e3-9", "source": "3", "target": "9", "label": "Slowed adoption"}, {"id": "e4-10", "source": "4", "target": "10", "label": "Frustrated gamers"}, {"id": "e4-11", "source": "4", "target": "11", "label": "Losses mounting"}, {"id": "e4-12", "source": "4", "target": "12", "label": "Lower revenues"}, {"id": "e7-13", "source": "7", "target": "13", "label": "Slowed Production"}, {"id": "e7-14", "source": "7", "target": "14", "label": "Limited Supply"}, {"id": "e7-15", "source": "7", "target": "15", "label": "Reduced Availability"}, {"id": "e10-16", "source": "10", "target": "16", "label": "Lower sales"}, {"id": "e10-17", "source": "10", "target": "17", "label": "Decreased morale"}, {"id": "e10-18", "source": "10", "target": "18", "label": "Tournament delays"}, {"id": "e13-19", "source": "13", "target": "19", "label": "Reduced Output"}, {"id": "e13-20", "source": "13", "target": "20", "label": "Slowed Adoption"}, {"id": "e13-21", "source": "13", "target": "21", "label": "Component Scarcity"}, {"id": "e16-22", "source": "16", "target": "22", "label": "Frustrated users"}, {"id": "e16-23", "source": "16", "target": "23", "label": "Losses mounting"}, {"id": "e16-24", "source": "16", "target": "24", "label": "Tournament delays"}, {"id": "e19-25", "source": "19", "target": "25", "label": "Job losses"}, {"id": "e19-26", "source": "19", "target": "26", "label": "Revenue decline"}, {"id": "e19-27", "source": "19", "target": "27", "label": "Price increase"}, {"id": "e22-28", "source": "22", "target": "28", "label": "Decreased morale"}, {"id": "e22-29", "source": "22", "target": "29", "label": "Tournament delays"}, {"id": "e22-30", "source": "22", "target": "30", "label": "Lower sales"}, {"id": "e23-31", "source": "23", "target": "31", "label": "Revenue decline"}, {"id": "e23-32", "source": "23", "target": "32", "label": "Tournament delays"}, {"id": "e23-33", "source": "23", "target": "33", "label": "Decreased morale"}, {"id": "e25-34", "source": "25", "target": "34", "label": "Claims increase"}, {"id": "e25-35", "source": "25", "target": "35", "label": "Reduced demand"}, {"id": "e25-36", "source": "25", "target": "36", "label": "Tax loss"}]}';
-mockData = JSON.parse(mockData);
+// Mock JSON Data
+let mockData = JSON.parse(
+  '{"nodes": [{"id": "0", "data": {"label": "Global Silicon Shortage"}}, {"id": "1", "data": {"label": "Semiconductor Industry"}}, {"id": "2", "data": {"label": "Renewable Energy"}}, {"id": "3", "data": {"label": "Consumer Electronics"}}, {"id": "4", "data": {"label": "Automotive Industry"}}, {"id": "5", "data": {"label": "Aerospace Industry"}}, {"id": "6", "data": {"label": "Telecommunications Sector"}}, {"id": "7", "data": {"label": "Car Sales Plummet"}}, {"id": "8", "data": {"label": "Auto Parts Suppliers Struggle"}}, {"id": "9", "data": {"label": "Electric Vehicle Adoption Slows"}}, {"id": "10", "data": {"label": "Investor Confidence Drop"}}, {"id": "11", "data": {"label": "Automaker Bankruptcies"}}, {"id": "12", "data": {"label": "Government Subsidies Increase"}}, {"id": "13", "data": {"label": "Job Losses"}}, {"id": "14", "data": {"label": "Economic Downturn"}}, {"id": "15", "data": {"label": "Government Bailouts"}}, {"id": "16", "data": {"label": "Automotive Industry"}}, {"id": "17", "data": {"label": "Consumer Electronics"}}, {"id": "18", "data": {"label": "Renewable Energy"}}, {"id": "19", "data": {"label": "Personal Computer Prices"}}, {"id": "20", "data": {"label": "Smartphone Availability"}}, {"id": "21", "data": {"label": "Data Center Capacity"}}, {"id": "22", "data": {"label": "Consumer Spending Power"}}, {"id": "23", "data": {"label": "Social Services Demand"}}, {"id": "24", "data": {"label": "Housing Market"}}, {"id": "25", "data": {"label": "Consumer Electronics"}}, {"id": "26", "data": {"label": "Solar Panel Industry"}}, {"id": "27", "data": {"label": "Automotive Industry"}}, {"id": "28", "data": {"label": "Retail Sales"}}, {"id": "29", "data": {"label": "E-commerce Platforms"}}, {"id": "30", "data": {"label": "Luxury Goods Sales"}}, {"id": "31", "data": {"label": "Smartphone Production"}}, {"id": "32", "data": {"label": "Data Center Expansion"}}, {"id": "33", "data": {"label": "Telecommunications Infrastructure"}}, {"id": "34", "data": {"label": "Luxury Goods Manufacturers"}}, {"id": "35", "data": {"label": "Luxury Goods Suppliers"}}, {"id": "36", "data": {"label": "Luxury Goods Investors"}}, {"id": "37", "data": {"label": "High-End Fashion Brands"}}, {"id": "38", "data": {"label": "Luxury Goods Suppliers"}}, {"id": "39", "data": {"label": "Luxury Goods Retailers"}}, {"id": "40", "data": {"label": "High-End Fashion Brands"}}, {"id": "41", "data": {"label": "Luxury Goods Suppliers"}}, {"id": "42", "data": {"label": "Luxury Goods Retailers"}}], "edges": [{"id": "e0-1", "source": "0", "target": "1", "label": "Production delays expected"}, {"id": "e0-2", "source": "0", "target": "2", "label": "Solar panel production slows"}, {"id": "e0-3", "source": "0", "target": "3", "label": "Device prices may rise"}, {"id": "e1-4", "source": "1", "target": "4", "label": "Production Delays"}, {"id": "e1-5", "source": "1", "target": "5", "label": "Project Delays"}, {"id": "e1-6", "source": "1", "target": "6", "label": "Infrastructure Delays"}, {"id": "e4-7", "source": "4", "target": "7", "label": "Reduced Revenue Streams"}, {"id": "e4-8", "source": "4", "target": "8", "label": "Supply Chain Disruptions"}, {"id": "e4-9", "source": "4", "target": "9", "label": "Sustainable Growth Stifled"}, {"id": "e7-10", "source": "7", "target": "10", "label": "Stock Market Volatility"}, {"id": "e7-11", "source": "7", "target": "11", "label": "Financial Instability"}, {"id": "e7-12", "source": "7", "target": "12", "label": "Fiscal Burden"}, {"id": "e11-13", "source": "11", "target": "13", "label": "Mass layoffs"}, {"id": "e11-14", "source": "11", "target": "14", "label": "Industry recession"}, {"id": "e11-15", "source": "11", "target": "15", "label": "Financial assistance"}, {"id": "e13-16", "source": "13", "target": "16", "label": "Increased Unemployment Rates"}, {"id": "e13-17", "source": "13", "target": "17", "label": "Supply Chain Labor Shortages"}, {"id": "e13-18", "source": "13", "target": "18", "label": "Reduced Solar Panel Manufacturing"}, {"id": "e14-19", "source": "14", "target": "19", "label": "Prices increase significantly"}, {"id": "e14-20", "source": "14", "target": "20", "label": "Limited models and stock"}, {"id": "e14-21", "source": "14", "target": "21", "label": "Expansion projects delayed"}, {"id": "e16-22", "source": "16", "target": "22", "label": "Decreased purchasing power"}, {"id": "e16-23", "source": "16", "target": "23", "label": "Increased demand"}, {"id": "e16-24", "source": "16", "target": "24", "label": "Potential decrease in demand"}, {"id": "e19-25", "source": "19", "target": "25", "label": "Higher PC Prices Expected"}, {"id": "e19-26", "source": "19", "target": "26", "label": "Reduced Production Capacity"}, {"id": "e19-27", "source": "19", "target": "27", "label": "Increased Costs for In-Dash Computers"}, {"id": "e22-28", "source": "22", "target": "28", "label": "Sales figures decline"}, {"id": "e22-29", "source": "22", "target": "29", "label": "Revenue drops significantly"}, {"id": "e22-30", "source": "22", "target": "30", "label": "Market share shrinks"}, {"id": "e25-31", "source": "25", "target": "31", "label": "Limited models and stock"}, {"id": "e25-32", "source": "25", "target": "32", "label": "Delayed projects"}, {"id": "e25-33", "source": "25", "target": "33", "label": "Slower development"}, {"id": "e30-34", "source": "30", "target": "34", "label": "Revenue decreases"}, {"id": "e30-35", "source": "30", "target": "35", "label": "Demand falls"}, {"id": "e30-36", "source": "30", "target": "36", "label": "Stock price drops"}, {"id": "e34-37", "source": "34", "target": "37", "label": "Reduced Production Capacity"}, {"id": "e34-38", "source": "34", "target": "38", "label": "Decreased Supply Chain"}, {"id": "e34-39", "source": "34", "target": "39", "label": "Reduced Inventory Levels"}, {"id": "e37-40", "source": "37", "target": "40", "label": "Reduced Production Capacity"}, {"id": "e37-41", "source": "37", "target": "41", "label": "Decreased Supply Chain"}, {"id": "e37-42", "source": "37", "target": "42", "label": "Reduced Inventory Levels"}]}'
+);
 
-// Function to auto-position nodes in a circular layout
-const generateCircularLayout = (nodes, parentId) => {
-  const parentNode = nodes.find((node) => node.id === parentId);
-  if (!parentNode) return nodes;
+// Function to auto-position nodes in a tree layout
+const getLayoutedElements = (nodes, edges) => {
+  if (nodes.length === 0) return { nodes, edges };
 
-  const radius = 200; // radius of the circle
-  const centerX = 300; // x position of the center
-  const centerY = 300; // y position of the center
-  const angleStep = (2 * Math.PI) / (nodes.length - 1);
+  // Create a hierarchy
+  const hierarchy = stratify()
+    .id((node) => node.id)
+    .parentId((node) => edges.find((edge) => edge.target === node.id)?.source);
 
-  return nodes.map((node, index) => {
-    if (node.id === parentId) {
-      return {
-        ...node,
-        position: { x: centerX, y: centerY },
-      };
-    }
-    
-    const angle = angleStep * index;
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
+  // Find the root node
+  const root = hierarchy(nodes);
 
-    return {
-      ...node,
-      position: { x, y },
-    };
-  });
+  // Define the tree layout
+  const layout = tree().nodeSize([200, 200]);
+
+  // Position the nodes
+  const layoutedNodes = layout(root)
+    .descendants()
+    .map((node) => ({
+      ...node.data,
+      position: { x: node.x, y: node.y },
+    }));
+
+  return { nodes: layoutedNodes, edges };
 };
+
+// Custom Node Component
+const CustomNode = ({ data }) => (
+  <CustomNodeStyle>{data.label}</CustomNodeStyle>
+);
 
 const Graph = () => {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState(mockData.edges);
 
   useEffect(() => {
-    // Auto-place nodes when component mounts with circular layout
-    setNodes(generateCircularLayout(mockData.nodes, "0"));
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+      mockData.nodes,
+      mockData.edges
+    );
+    setNodes(layoutedNodes);
+    setEdges(layoutedEdges);
   }, []);
 
   return (
     <GraphContainer>
-      <ReactFlow nodes={nodes} edges={edges}>
+      <ReactFlow nodes={nodes} edges={edges} nodeTypes={{ custom: CustomNode }}>
         <Background />
         <MiniMap nodeStrokeColor="gray" nodeColor="lightblue" />
         <Controls />
