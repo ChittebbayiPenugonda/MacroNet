@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react';
-import Globe from 'react-globe.gl';
-import * as THREE from 'three';
-import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
-import axios from 'axios';
-import Graph from './Graph'; // Import the Graph component
-import styled from 'styled-components';
+import React, { useEffect, useState, useRef } from "react";
+import Globe from "react-globe.gl";
+import * as THREE from "three";
+import { TrackballControls } from "three/examples/jsm/controls/TrackballControls";
+import axios from "axios";
+import Graph from "./Graph"; // Import the Graph component
+import styled from "styled-components";
 
 // Styled Component for the Graph Container
 const GraphContainer = styled.div`
-  width: ${(props) => (props.isMinimized ? '250px' : '90%')};
-  height: ${(props) => (props.isMinimized ? '150px' : '90vh')};
+  width: ${(props) => (props.isMinimized ? "250px" : "90%")};
+  height: ${(props) => (props.isMinimized ? "150px" : "90vh")};
   position: absolute;
   top: 20px;
   right: 20px;
@@ -34,7 +34,7 @@ const TextContainer = styled.div`
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: 2px solid #00F9FF;
+  border: 2px solid #00f9ff;
   z-index: 1000;
   overflow-y: auto;
   max-height: 300px;
@@ -46,63 +46,127 @@ const GlobeComponent = () => {
   const [clickedCountry, setClickedCountry] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isGraphMinimized, setIsGraphMinimized] = useState(true);
-  const [dynamicText, setDynamicText] = useState(''); // State to store dynamic text
+  const [dynamicText, setDynamicText] = useState("");
   const globeRef = useRef(null);
+  const [userQuery, setUserQuery] = useState("");
+  const [graphData, setGraphData] = useState(null); // State to hold graph data
 
   // Fetch mock country score data
   useEffect(() => {
     const mockData = [
-      { name: "United States of America", score: 90, description: "The United States is a global superpower with the largest economy." },
-      { name: "Brazil", score: 70, description: "Brazil is known for its rainforests, soccer, and Carnival festival." },
-      { name: "Germany", score: 85, description: "Germany is a leading industrial country in Europe with a rich cultural history." },
-      { name: "India", score: 60, description: "India is the world's largest democracy and a major economic force in Asia." },
-      { name: "Australia", score: 80, description: "Australia is known for its unique wildlife, beautiful landscapes, and beaches." },
-      { name: "Canada", score: 75, description: "Canada is the second-largest country by land area and famous for its natural beauty." },
-      { name: "China", score: 95, description: "China is the world's most populous country and an economic powerhouse." },
-      { name: "Russia", score: 50, description: "Russia is the largest country by land area and rich in natural resources." },
-      { name: "South Africa", score: 65, description: "South Africa is known for its diverse cultures, wildlife, and beautiful landscapes." },
-      { name: "Mexico", score: 55, description: "Mexico is known for its rich cultural heritage, cuisine, and beautiful beaches." }
+      {
+        name: "United States of America",
+        score: 90,
+        description:
+          "The United States is a global superpower with the largest economy.",
+      },
+      {
+        name: "Brazil",
+        score: 70,
+        description:
+          "Brazil is known for its rainforests, soccer, and Carnival festival.",
+      },
+      {
+        name: "Germany",
+        score: 85,
+        description:
+          "Germany is a leading industrial country in Europe with a rich cultural history.",
+      },
+      {
+        name: "India",
+        score: 60,
+        description:
+          "India is the world's largest democracy and a major economic force in Asia.",
+      },
+      {
+        name: "Australia",
+        score: 80,
+        description:
+          "Australia is known for its unique wildlife, beautiful landscapes, and beaches.",
+      },
+      {
+        name: "Canada",
+        score: 75,
+        description:
+          "Canada is the second-largest country by land area and famous for its natural beauty.",
+      },
+      {
+        name: "China",
+        score: 95,
+        description:
+          "China is the world's most populous country and an economic powerhouse.",
+      },
+      {
+        name: "Russia",
+        score: 50,
+        description:
+          "Russia is the largest country by land area and rich in natural resources.",
+      },
+      {
+        name: "South Africa",
+        score: 65,
+        description:
+          "South Africa is known for its diverse cultures, wildlife, and beautiful landscapes.",
+      },
+      {
+        name: "Mexico",
+        score: 55,
+        description:
+          "Mexico is known for its rich cultural heritage, cuisine, and beautiful beaches.",
+      },
     ];
-    setCountryData(mockData);
+    //setCountryData(mockData);
   }, []);
 
   // Fetch GeoJSON data for countries
   useEffect(() => {
-    axios.get('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
+    axios
+      .get(
+        "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json"
+      )
       .then((response) => {
         setGeoJson(response.data);
       })
       .catch((error) => {
-        console.error('Error fetching GeoJSON data', error);
+        console.error("Error fetching GeoJSON data", error);
       });
   }, []);
 
   // Fetch dynamic text from backend (replace with your backend URL)
-  useEffect(() => {
-    axios.get('https://your-backend-api.com/get-text')  // Replace with actual API URL
+  /*useEffect(() => {
+    axios
+      .get("https://your-backend-api.com/get-text") // Replace with actual API URL
       .then((response) => {
-        setDynamicText(response.data.text);  // Assuming your API returns an object with a "text" field
+        setDynamicText(response.data.text); // Assuming your API returns an object with a "text" field
       })
       .catch((error) => {
-        console.error('Error fetching dynamic text', error);
+        console.error("Error fetching dynamic text", error);
       });
-  }, []);
+  }, []);*/
 
   // Map country data to GeoJSON feature properties
-  const colorCountries = geoJson && countryData.length > 0 ? geoJson.features.map((feature) => {
-    const countryName = feature.properties.name;
-    const country = countryData.find(country => country.name === countryName);
+  const colorCountries =
+    geoJson && countryData.length > 0
+      ? geoJson.features.map((feature) => {
+          const countryName = feature.properties.name;
+          const country = countryData.find(
+            (country) => country.name === countryName
+          );
 
-    return {
-      ...feature,
-      properties: {
-        ...feature.properties,
-        score: country?.score,
-        description: country?.description,
-        color: country?.score !== undefined ? `rgba(255, 0, 0, ${Math.min(country.score / 100, 1)})` : 'rgba(255, 255, 255, 0.1)',
-      }
-    };
-  }) : [];
+          return {
+            ...feature,
+            properties: {
+              ...feature.properties,
+              score: country?.score,
+              description: country?.description,
+              color:
+                country?.score !== undefined
+                  ? `rgba(255, 0, 0, ${Math.min(country.score / 100, 1)})`
+                  : "rgba(255, 255, 255, 0.1)",
+            },
+          };
+        })
+      : [];
 
   // Handle click event
   const handleClick = (country) => {
@@ -145,8 +209,8 @@ const GlobeComponent = () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
       };
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
     }
   }, [globeRef]);
 
@@ -157,35 +221,69 @@ const GlobeComponent = () => {
     img.src = "//unpkg.com/three-globe/example/img/earth-topology.png";
   }, []);
 
+  const handleInputChange = (e) => {
+    setUserQuery(e.target.value);
+  };
+
+  const handleSubmit = async () => {
+    fetch(`http://127.0.0.1:5000/api/query?q=${userQuery}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setGraphData(data);
+        console.log(data.regions.data);
+        let regions = [];
+        for (let i = 0; i < data.regions.data.length; i++) {
+          regions.push({
+            name: data.regions.data[i]["country_name"],
+            score: parseInt(data.regions.data[i]["score"]),
+            description: data.regions.data[i]["description"],
+          });
+        }
+        console.log(regions);
+        setCountryData(regions);
+      });
+  };
+
   return (
-    <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
-      {!isLoaded && <div style={{ color: 'white', fontSize: '24px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>Loading...</div>}
-      
+    <div style={{ width: "100%", height: "100vh", position: "relative" }}>
+      {!isLoaded && (
+        <div
+          style={{
+            color: "white",
+            fontSize: "24px",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          Loading...
+        </div>
+      )}
       <Globe
         ref={globeRef}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         polygonsData={colorCountries}
-        polygonCapColor={d => d.properties.color}
+        polygonCapColor={(d) => d.properties.color}
         polygonSideColor="rgba(0, 200, 0, 0.1)"
         polygonStrokeColor="#111"
         polygonAltitude={0.01}
         showGraticules
         onPolygonClick={handleClick}
       />
-      
-      {/* Input Form - Top Left */}
-      <div 
+      ... {/* Input Form - Top Left */}
+      <div
         style={{
-          position: 'absolute',
-          top: '20px',
-          left: '20px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '20px',
-          borderRadius: '10px',
-          background: 'rgba(0, 0, 0, 0.6)',
-          boxShadow: '0 0 20px rgba(0, 255, 255, 0.5)',
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "20px",
+          borderRadius: "10px",
+          background: "rgba(0, 0, 0, 0.6)",
+          boxShadow: "0 0 20px rgba(0, 255, 255, 0.5)",
           zIndex: 1000,
         }}
       >
@@ -193,72 +291,73 @@ const GlobeComponent = () => {
           type="text"
           placeholder="Enter your hypothetical scenario"
           style={{
-            padding: '15px',
-            fontSize: '18px',
-            border: '2px solid #00F9FF',
-            borderRadius: '8px',
-            color: '#fff',
-            backgroundColor: 'transparent',
-            width: '300px',
-            textAlign: 'center',
-            marginBottom: '20px',
-            transition: 'all 0.3s ease-in-out',
-            outline: 'none',
+            padding: "15px",
+            fontSize: "18px",
+            border: "2px solid #00F9FF",
+            borderRadius: "8px",
+            color: "#fff",
+            backgroundColor: "transparent",
+            width: "300px",
+            textAlign: "center",
+            marginBottom: "20px",
+            transition: "all 0.3s ease-in-out",
+            outline: "none",
           }}
-          onFocus={(e) => e.target.style.borderColor = '#00FF99'}
-          onBlur={(e) => e.target.style.borderColor = '#00F9FF'}
+          onFocus={(e) => (e.target.style.borderColor = "#00FF99")}
+          onBlur={(e) => (e.target.style.borderColor = "#00F9FF")}
+          value={userQuery}
+          onChange={handleInputChange}
         />
         <button
           style={{
-            padding: '12px 18px',
-            backgroundColor: '#00F9FF',
-            color: 'black',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '18px',
-            transition: 'all 0.3s ease-in-out',
-            width: '200px',
+            padding: "12px 18px",
+            backgroundColor: "#00F9FF",
+            color: "black",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "18px",
+            transition: "all 0.3s ease-in-out",
+            width: "200px",
           }}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#00FF99'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#00F9FF'}
+          onMouseOver={(e) => (e.target.style.backgroundColor = "#00FF99")}
+          onMouseOut={(e) => (e.target.style.backgroundColor = "#00F9FF")}
+          onClick={handleSubmit}
         >
           Predict
         </button>
       </div>
-      
       {/* Graph Container - Toggle Minimize/Expand */}
       <GraphContainer
         isMinimized={isGraphMinimized}
         onClick={() => setIsGraphMinimized(!isGraphMinimized)}
       >
-        <Graph />
+        <Graph data={graphData} />{" "}
+        {/* Pass the graph data to the Graph component */}
       </GraphContainer>
-
       {/* Dynamic Text Container */}
-      <TextContainer>
+      {/* <TextContainer>
         <h3>Dynamic Information</h3>
         <p>{dynamicText || "Loading dynamic text..."}</p>
-      </TextContainer>
-
+      </TextContainer> */}
       {/* Popup for country info */}
       {clickedCountry && (
-        <div 
+        <div
           style={{
-            position: 'absolute',
-            bottom: '150px',
-            right: '20px',
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            color: 'white',
-            padding: '15px',
-            borderRadius: '8px',
-            maxWidth: '300px',
+            position: "absolute",
+            bottom: "150px",
+            right: "20px",
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            color: "white",
+            padding: "15px",
+            borderRadius: "8px",
+            maxWidth: "300px",
             zIndex: 1000,
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            border: '2px solid #00F9FF',
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            border: "2px solid #00F9FF",
           }}
         >
-          <h3 style={{ margin: '0 0 10px 0' }}>{clickedCountry.name}</h3>
+          <h3 style={{ margin: "0 0 10px 0" }}>{clickedCountry.name}</h3>
           <p style={{ margin: 0 }}>{clickedCountry.description}</p>
         </div>
       )}
